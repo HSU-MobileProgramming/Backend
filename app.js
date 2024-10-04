@@ -8,6 +8,7 @@ const userRouter = require('./routes/user.js');
 
 app.use('/user',userRouter);
 
+
 const server = http.createServer(app);
 
 // const upload = multer({ storage: storage });  // 업로드 
