@@ -2,6 +2,7 @@ const express = require("express");
 const http = require('http');
 // const multer = require('multer');  // 파일 업로드
 const app = express();
+app.use(express.json());
 const port = 3000;
 
 const userRouter = require('./routes/user.js');
