@@ -1,20 +1,22 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require('express');
+const http = require('http');
+// const multer = require('multer');  // 파일 업로드
+const port = 3000;
+const app = express();
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-
-var app = express();
-
-app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+const userRouter = require('./routes/user.js');
+
+app.use('/user',userRouter);
+
+const server = http.createServer(app);
+
+// const upload = multer({ storage: storage });  // 업로드
+
+server.listen(port, () => {
+    console.log(`서버 오픈 포트번호:${port}`);
+});
 
 module.exports = app;
