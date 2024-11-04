@@ -1,11 +1,11 @@
 const mysql = require('mysql2');
 
 // MySQL 데이터베이스 연결 설정
-const db_info = require('./config.js')
+const { config } = require('./config.js')
 
 module.exports = {
     init: function () {
-        return mysql.createConnection(db_info);
+        return mysql.createConnection(config);
     },
     connect: function (conn) {
         conn.connect(function (err) {
