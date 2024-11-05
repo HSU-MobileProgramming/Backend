@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const crypto = require('crypto');  // 비밀번호 해싱
-const db = require('../config/mysql.js');   // 설정 파일
+const db = require('../config/mysql.js');
+const authenticateToken = require('../utils/auth');
 
 let con = db.init();
 db.connect(con);
@@ -31,7 +32,6 @@ router.post('/register', (req, res) => {
             console.error("회원가입 실패:", err.message);
             return res.status(500).json({ message: "회원가입 중 오류가 발생했습니다." });
         }
-        console.log()
         res.status(201).json({ message: "회원가입 성공!", userId: result.insertId });
     });
 });
@@ -55,9 +55,30 @@ router.post('/login', (req, res) => {
             return res.status(401).json({ message: "이메일 또는 비밀번호가 잘못되었습니다." });
         }
         // 로그인 성공
-        res.status(200).json({ message: "로그인 성공!", user: results[0] });
+        const user = results[0];
+        const token = jwt.sign(
+            { userId: user.user_id, email: user.email }, 
+            SECRET_KEY,
+            { expiresIn: '1h' } // 토큰 유효 시간 1h
+        );
+        res.status(200).json({ message: "로그인 성공!", user: results[0], token: token });
     });
 });
 
+// 사용자 정보 조회
+router.get('/profile', authenticateToken, (req, res) => {
+    const userId = req.user.userId; // JWT에서 userId 추출
+    const query = `SELECT * FROM users WHERE user_id = ?`;
+    con.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error("사용자 정보 조회 실패:", err.message);
+            return res.status(500).json({ message: "사용자 정보를 가져오는 중 오류가 발생했습니다." });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+        }
+        res.status(200).json({ user: results[0] });
+    });
+});
 
 module.exports = router;
