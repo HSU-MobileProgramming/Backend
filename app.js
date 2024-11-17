@@ -8,8 +8,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const userRouter = require('./routes/user.js');
+const mapRouter = require('./routes/map.js')
 
-app.use('/user',userRouter);
+app.use('/user', userRouter);
+app.use('/maps', mapRouter);
 
 const server = http.createServer(app);
 
