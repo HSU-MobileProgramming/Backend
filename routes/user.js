@@ -4,6 +4,9 @@ const crypto = require('crypto');  // 비밀번호 해싱
 const db = require('../config/mysql.js');
 const authenticateToken = require('../utils/auth');
 
+const jwt = require('jsonwebtoken');
+const { SECRET_KEY } = require('../config/config.js');
+
 let con = db.init();
 db.connect(con);
 
