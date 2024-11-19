@@ -1,17 +1,21 @@
 const express = require('express');
 const http = require('http');
 // const multer = require('multer');  // 파일 업로드
+const bodyParser = require("body-parser");
 const port = 3000;
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.json()); // JSON 파싱 활성화
 
 const userRouter = require('./routes/user.js');
-const mapRouter = require('./routes/map.js')
+const mapRouter = require('./routes/map.js');
+const tripRouter = require('./routes/trip.js');
 
 app.use('/user', userRouter);
 app.use('/maps', mapRouter);
+app.use('/trip', tripRouter);
 
 const server = http.createServer(app);
 
