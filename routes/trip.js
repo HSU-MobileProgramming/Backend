@@ -30,17 +30,35 @@ router.put("/travel/complete/:travelId", authenticateToken, (req, res) => {
     });
 });
 
-
 // user_id로 여행 기록 전체 조회 (도시 이름과 나라 이름 포함)
 router.get("/travels", authenticateToken, (req, res) => {
-    const userId = req.user.id; // 인증된 유저의 ID
+    const userId = req.user.userId; // 인증된 유저의 ID
     const query = `
       SELECT t.travel_id, t.title, t.start_date, t.end_date, t.description, 
              c.name AS city_name, co.name AS country_name
       FROM travel t
       JOIN city c ON t.city_id = c.city_id
       JOIN country co ON t.country_id = co.country_id
-      WHERE t.user_id = ? AND t.travel_open = 1
+      WHERE t.user_id = ? AND t.is_active = 0
+    `;
+    con.query(query, [userId], (err, results) => {
+        if (err) 
+            return res.status(500).send("여행 기록 조회 실패");
+        
+        res.send(results);
+    });
+});
+
+// userId로 현재 여행중인 나라 조회
+router.get("/current_travel", authenticateToken, (req, res) => {
+    const userId = req.user.userId; // 인증된 유저의 ID
+    const query = `
+      SELECT t.travel_id, t.title, t.start_date, t.end_date, t.description, 
+             c.name AS city_name, co.name AS country_name
+      FROM travel t
+      JOIN city c ON t.city_id = c.city_id
+      JOIN country co ON t.country_id = co.country_id
+      WHERE t.user_id = ? AND t.is_active = 1
     `;
     con.query(query, [userId], (err, results) => {
         if (err) 
@@ -52,7 +70,7 @@ router.get("/travels", authenticateToken, (req, res) => {
 
 // travels_id와 user_id로 특정 여행 기록 조회
 router.get("/travel/:travelId", authenticateToken, (req, res) => {
-    const userId = req.user.id; // 인증된 유저의 ID
+    const userId = req.user.userId; // 인증된 유저의 ID
     const travelId = req.params.travelId; // 요청 경로에서 travels_id 추출
     const query = `
       SELECT t.travel_id, t.title, t.start_date, t.end_date, t.description, 
@@ -74,6 +92,24 @@ router.get("/travel/:travelId", authenticateToken, (req, res) => {
     });
 });
 
+// 모든 여행 기록 조회 (유저의 모든 여행)
+router.get("/all_travels", authenticateToken, (req, res) => {
+    const userId = req.user.userId; // 인증된 유저의 ID
+    const query = `
+      SELECT t.travel_id, t.title, t.start_date, t.end_date, t.description, 
+             c.name AS city_name, co.name AS country_name
+      FROM travel t
+      JOIN city c ON t.city_id = c.city_id
+      JOIN country co ON t.country_id = co.country_id
+      WHERE t.user_id != ? AND t.travel_open = 1
+    `;
+    con.query(query, [userId], (err, results) => {
+        if (err) 
+            return res.status(500).send("여행 기록 조회 실패");
+        
+        res.send(results);
+    });
+});
 
-  
+
 module.exports = router;
