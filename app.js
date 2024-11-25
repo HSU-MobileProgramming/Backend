@@ -13,6 +13,10 @@ const userRouter = require('./routes/user.js');
 const mapRouter = require('./routes/map.js');
 const tripRouter = require('./routes/trip.js');
 
+// temp code
+const imageTestRouter = require('./routes/image_test.js');
+app.use('/image', imageTestRouter);
+
 app.use('/user', userRouter);
 app.use('/maps', mapRouter);
 app.use('/trip', tripRouter);
