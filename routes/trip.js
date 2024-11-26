@@ -101,15 +101,20 @@ router.get("/all_travels", authenticateToken, (req, res) => {
       FROM travel t
       JOIN city c ON t.city_id = c.city_id
       JOIN country co ON t.country_id = co.country_id
-      WHERE t.user_id != ? AND t.travel_open = 1
+      WHERE t.user_id != ? AND t.travel_open = 1 AND t.is_active = 0
     `;
     con.query(query, [userId], (err, results) => {
-        if (err) 
-            return res.status(500).send("여행 기록 조회 실패");
+        if (err) {
+            return res.status(500).send("여행 기록 조회 실패"); // 서버 오류
+        }
+        if (results.length === 0) {
+            return res.status(404).send("여행 기록이 없습니다."); // 결과가 없을 때
+        }
         
-        res.send(results);
+        res.status(200).send(results); // 정상 조회
     });
 });
+
 
 
 module.exports = router;
