@@ -17,7 +17,7 @@ function hashPassword(password) {
 
 // 회원가입 URL
 router.post('/register', (req, res) => {
-    const { name, email, password, phone, nickname, gender, profile_img, country, gps_consent, is_public } = req.body;
+    const { name, email, password, nickname, gender, profile_img, country, gps_consent, is_public } = req.body;
     // 필수값 확인
     if (!name || !email || !password) {
         return res.status(400).json({ message: "이름, 이메일, 비밀번호는 필수 항목입니다." });
@@ -26,10 +26,10 @@ router.post('/register', (req, res) => {
     const hashedPassword = hashPassword(password);
     // MySQL 삽입 쿼리
     const query = `
-        INSERT INTO users (name, email, password, phone, nickname, gender, profile_img, country, gps_consent, is_public)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (name, email, password, nickname, gender, profile_img, country, gps_consent, is_public)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    const values = [name, email, hashedPassword, phone, nickname, gender, profile_img, country, gps_consent, is_public];
+    const values = [name, email, hashedPassword, nickname, gender, profile_img, country, gps_consent, is_public];
     con.query(query, values, (err, result) => {
         if (err) {
             console.error("회원가입 실패:", err.message);
