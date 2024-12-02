@@ -8,27 +8,33 @@ db.connect(con);
 
 // 여행 기록 생성 
 router.post("/travel_create", authenticateToken, (req, res) => {
-    const { userId, cityId, countryId, title, startDate, endDate, description } = req.body;
+    const { cityId, countryId, title, startDate, endDate, description } = req.body;
+    const userId = req.user.userId;
     const query = `
       INSERT INTO travel (user_id, city_id, country_id, title, start_date, end_date, description, is_active) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     con.query(query, [userId, cityId, countryId, title, startDate, endDate, description, 1], (err, result) => {
-    if (err) 
-        return res.status(500).send("여행 기록 생성 실패");
-    res.status(201).send({ travelId: result.insertId, message: "여행 기록 생성 완료" });
+        if (err) {
+            return res.status(500).json({ message: "여행 기록 생성 실패" });
+        }
+        res.status(201).json({ travelId: result.insertId, message: "여행 기록 생성 완료" });
     });
 });
+
   
 // 여행기 종료
 router.put("/travel/complete/:travelId", authenticateToken, (req, res) => {
     const travelId = req.params.travelId;
     const query = "UPDATE travel SET is_active = 0 WHERE travel_id = ?";
     con.query(query, [travelId], (err) => {
-        if (err) return res.status(500).send("여행 기록 종료 실패");
-        res.send("여행 기록 종료 완료");
+        if (err) {
+            return res.status(500).json({ message: "여행 기록 종료 실패" }); // JSON 형식으로 에러 메시지 반환
+        }
+        res.status(200).json({ message: "여행 기록 종료 완료", travelId }); // 성공 메시지와 travelId 반환
     });
 });
+
 
 // user_id로 여행 기록 전체 조회 (도시 이름과 나라 이름 포함)
 router.get("/travels", authenticateToken, (req, res) => {
