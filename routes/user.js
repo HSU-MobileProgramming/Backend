@@ -22,6 +22,20 @@ router.post('/register', (req, res) => {
     if (!name || !email || !password) {
         return res.status(400).json({ message: "이름, 이메일, 비밀번호는 필수 항목입니다." });
     }
+
+    // 이메일 중복 확인
+    const emailCheckQuery = `SELECT * FROM users WHERE email = ?`;
+    con.query(emailCheckQuery, [email], (err, results) => {
+        if (err) {
+            console.error("이메일 중복 확인 실패:", err.message);
+            return res.status(500).json({ message: "회원가입 중 오류가 발생했습니다." });
+        }
+        if (results.length > 0) {
+            return res.status(409).json({ message: "이미 사용중인 이메일입니다." });
+        }
+    });
+
+
     // 비밀번호 해싱
     const hashedPassword = hashPassword(password);
     // MySQL 삽입 쿼리
