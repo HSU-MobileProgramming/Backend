@@ -82,10 +82,10 @@ router.post('/', authenticateToken, (req, res) => {
 // 티켓 조회 API
 router.get('/:travel_record_id', authenticateToken, (req, res) => {
     const travel_record_id = req.params.travel_record_id;
-
     const query = `
-        SELECT t.travel_record_id, t.travel_id, t.place, t.ticket_date
+        SELECT t.travel_record_id, p.travel_id, t.place, t.ticket_date
         FROM ticket t
+        JOIN piece p ON t.travel_record_id = p.travel_record_id
         WHERE t.travel_record_id = ?
     `;
 
@@ -104,5 +104,6 @@ router.get('/:travel_record_id', authenticateToken, (req, res) => {
         res.status(200).json(results[0]);
     });
 });
+
 
 module.exports = router;
