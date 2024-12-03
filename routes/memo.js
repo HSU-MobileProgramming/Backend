@@ -42,18 +42,6 @@ router.post('/', authenticateToken, (req, res) => {
             });
         }
 
-        /*
-            CREATE TABLE piece (
-                travel_record_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                travel_id BIGINT,
-                category ENUM('photo', 'text', 'ticket') NOT NULL,
-                description TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                FOREIGN KEY (travel_id) REFERENCES travel(travel_id) ON DELETE CASCADE
-            );
-        */
-
         const query = `
             INSERT INTO piece (travel_id, category, description, created_at)
             VALUES (?, 'text', ?, ?)
@@ -73,6 +61,32 @@ router.post('/', authenticateToken, (req, res) => {
                 piece_id: result.insertId 
             });
         });
+    });
+});
+
+// 메모 조각 조회 API
+router.get('/:travel_record_id', authenticateToken, (req, res) => {
+    const travel_record_id = req.params.travel_record_id;
+
+    const query = `
+        SELECT travel_record_id, travel_id, description, created_at
+        FROM piece
+        WHERE travel_record_id = ?
+    `;
+
+    con.query(query, [travel_record_id], (err, results) => {
+        if (err) {
+            console.error("메모 조회 실패:", err.message);
+            return res.status(500).json({ 
+                message: "메모 조회 중 오류가 발생했습니다." 
+            });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ 
+                message: "존재하지 않는 메모 조각입니다." 
+            });
+        }
+        res.status(200).json(results[0]);
     });
 });
 
