@@ -30,6 +30,7 @@ const uploadImage = multer({
       }
       const key = `images/${Date.now()}_${file.originalname}`;
       const imageUrl = `https://${AWS_S3_BUCKET_NAME}.s3.${AWS_S3_REGION}.amazonaws.com/${key}`;
+      console.log("uploadImageUrl: " + imageUrl);
       file.location = imageUrl; // Add image URL to file object
       cb(null, key);
     },
