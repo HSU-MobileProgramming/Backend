@@ -19,8 +19,7 @@ function hashPassword(password) {
 // 회원가입 URL
 router.post("/register", uploadImage.single("profile_img"), (req, res) => {
     const { name, email, password, nickname, gender, country, gps_consent, is_public } = req.body;
-    const profile_img = req.file?.location; // 업로드된 이미지의 S3 URL
-  
+    const profile_img = req.file?.location || null; 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "이름, 이메일, 비밀번호는 필수 항목입니다." });
     }
