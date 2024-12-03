@@ -25,10 +25,6 @@ router.post("/register", uploadImage.single("profile_img"), (req, res) => {
       return res.status(400).json({ message: "이름, 이메일, 비밀번호는 필수 항목입니다." });
     }
   
-    if (!profile_img) {
-      return res.status(400).json({ message: "프로필 이미지는 필수 항목입니다." });
-    }
-
     const emailCheckQuery = `SELECT * FROM users WHERE email = ?`;
     con.query(emailCheckQuery, [email], (err, results) => {
       if (err) {
