@@ -102,24 +102,33 @@ router.get("/travel/:travelId", authenticateToken, (req, res) => {
 router.get("/all_travels", authenticateToken, (req, res) => {
     const userId = req.user.userId; // 인증된 유저의 ID
     const query = `
-      SELECT t.travel_id, t.title, t.start_date, t.end_date, 
-             c.name AS city_name, co.name AS country_name
+      SELECT 
+          t.travel_id, 
+          t.title, 
+          t.start_date, 
+          t.end_date, 
+          c.name AS city_name, 
+          co.name AS country_name, 
+          u.nickname, 
+          u.profile_img
       FROM travel t
       JOIN city c ON t.city_id = c.city_id
       JOIN country co ON t.country_id = co.country_id
+      JOIN users u ON t.user_id = u.user_id
       WHERE t.user_id != ? AND t.travel_open = 1 AND t.is_active = 0
     `;
     con.query(query, [userId], (err, results) => {
         if (err) {
+            console.error("여행 기록 조회 실패:", err.message);
             return res.status(500).send("여행 기록 조회 실패"); // 서버 오류
         }
         if (results.length === 0) {
             return res.status(404).send("여행 기록이 없습니다."); // 결과가 없을 때
         }
-        
-        res.status(200).send(results); // 정상 조회
+        res.status(200).json(results); // 정상 조회
     });
 });
+
 
 
 
