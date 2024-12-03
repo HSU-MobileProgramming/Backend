@@ -19,7 +19,7 @@ const photoRouter = require('./routes/photo.js');
 app.use('/user', userRouter);
 app.use('/maps', mapRouter);
 app.use('/trip', tripRouter);
-app.use('/ticket',ticketRouter);
+app.use('/piece/ticket',ticketRouter);
 app.use('/piece/memo', memoRouter);
 app.use('/piece/photo', photoRouter);
 
