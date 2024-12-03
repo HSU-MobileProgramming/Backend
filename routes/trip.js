@@ -8,11 +8,18 @@ db.connect(con);
 
 // 여행 기록 생성 
 router.post("/travel_create", authenticateToken, (req, res) => {
-    const { cityId, countryId, title, startDate, endDate, description } = req.body;
     const userId = req.user.userId;
+    const { cityId, countryId, title, startDate, endDate, description } = req.body;
+
+    if (!cityId || !countryId || !title || !startDate || !endDate) {
+        return res.status(400).json({
+            message: "도시 ID, 나라 ID, 제목, 시작일, 종료일은 필수 항목입니다."
+        });
+    }
+
     const query = `
-      INSERT INTO travel (user_id, city_id, country_id, title, start_date, end_date, description, is_active) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO travel (user_id, city_id, country_id, title, start_date, end_date, description, is_active) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     con.query(query, [userId, cityId, countryId, title, startDate, endDate, description, 1], (err, result) => {
         if (err) {
@@ -23,7 +30,6 @@ router.post("/travel_create", authenticateToken, (req, res) => {
     });
 });
 
-  
 // 여행기 종료
 router.put("/travel/complete/:travelId", authenticateToken, (req, res) => {
     const travelId = req.params.travelId;
