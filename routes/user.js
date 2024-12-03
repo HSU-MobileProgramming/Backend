@@ -3,6 +3,7 @@ const router = express.Router();
 const crypto = require('crypto');  // 비밀번호 해싱
 const db = require('../config/mysql.js');
 const authenticateToken = require('../utils/auth');
+const uploadImage = require("../utils/s3_util"); 
 
 const jwt = require('jsonwebtoken');
 const { SECRET_KEY } = require('../config/config.js');
@@ -16,42 +17,50 @@ function hashPassword(password) {
 }
 
 // 회원가입 URL
-router.post('/register', (req, res) => {
-    const { name, email, password, nickname, gender, profile_img, country, gps_consent, is_public } = req.body;
-    // 필수값 확인
-    if (!name || !email || !password) {
-        return res.status(400).json({ message: "이름, 이메일, 비밀번호는 필수 항목입니다." });
-    }
-
-    // 이메일 중복 확인
-    const emailCheckQuery = `SELECT * FROM users WHERE email = ?`;
-    con.query(emailCheckQuery, [email], (err, results) => {
+router.post("/register",uploadImage.single("profile_img"), (req, res) => { 
+      const {name,email,password,nickname,gender, country,gps_consent,is_public} = req.body;
+      const profile_img = req.file?.location; 
+      if (!name || !email || !password) {
+        return res
+          .status(400)
+          .json({ message: "이름, 이메일, 비밀번호는 필수 항목입니다." });
+      }
+      // 이메일 중복 확인
+      const emailCheckQuery = `SELECT * FROM users WHERE email = ?`;
+      con.query(emailCheckQuery, [email], (err, results) => {
         if (err) {
-            console.error("이메일 중복 확인 실패:", err.message);
-            return res.status(500).json({ message: "회원가입 중 오류가 발생했습니다." });
+          console.error("이메일 중복 확인 실패:", err.message);
+          return res
+            .status(500)
+            .json({ message: "회원가입 중 오류가 발생했습니다." });
         }
         if (results.length > 0) {
-            return res.status(409).json({ message: "이미 사용중인 이메일입니다." });
+          return res.status(409).json({ message: "이미 사용중인 이메일입니다." });
         }
-    });
-
-
-    // 비밀번호 해싱
-    const hashedPassword = hashPassword(password);
-    // MySQL 삽입 쿼리
-    const query = `
-        INSERT INTO users (name, email, password, nickname, gender, profile_img, country, gps_consent, is_public)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    const values = [name, email, hashedPassword, nickname, gender, profile_img, country, gps_consent, is_public];
-    con.query(query, values, (err, result) => {
-        if (err) {
+        const hashedPassword = hashPassword(password);
+        const query = `
+          INSERT INTO users (name, email, password, nickname, gender, profile_img, country, gps_consent, is_public)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const values = [name,email,hashedPassword,nickname,gender,profile_img,country,
+          gps_consent === "true", 
+          is_public === "true", 
+        ];
+  
+        con.query(query, values, (err, result) => {
+          if (err) {
             console.error("회원가입 실패:", err.message);
-            return res.status(500).json({ message: "회원가입 중 오류가 발생했습니다." });
-        }
-        res.status(201).json({ message: "회원가입 성공!", userId: result.insertId });
-    });
-});
+            return res
+              .status(500)
+              .json({ message: "회원가입 중 오류가 발생했습니다." });
+          }
+          res
+            .status(201)
+            .json({ message: "회원가입 성공!", userId: result.insertId });
+        });
+      });
+    }
+  );
 
 // 로그인 URL 성공 시 유저 객체 json으로 반환
 router.post('/login', (req, res) => {

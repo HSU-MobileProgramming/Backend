@@ -102,7 +102,7 @@ router.get("/travel/:travelId", authenticateToken, (req, res) => {
 router.get("/all_travels", authenticateToken, (req, res) => {
     const userId = req.user.userId; // 인증된 유저의 ID
     const query = `
-      SELECT t.travel_id, t.title, t.start_date, t.end_date, t.description, 
+      SELECT t.travel_id, t.title, t.start_date, t.end_date, 
              c.name AS city_name, co.name AS country_name
       FROM travel t
       JOIN city c ON t.city_id = c.city_id
