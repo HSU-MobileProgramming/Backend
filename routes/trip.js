@@ -16,6 +16,7 @@ router.post("/travel_create", authenticateToken, (req, res) => {
     `;
     con.query(query, [userId, cityId, countryId, title, startDate, endDate, description, 1], (err, result) => {
         if (err) {
+            console.error("여행 기록 생성 실패:", err.message);
             return res.status(500).json({ message: "여행 기록 생성 실패" });
         }
         res.status(201).json({ travelId: result.insertId, message: "여행 기록 생성 완료" });
