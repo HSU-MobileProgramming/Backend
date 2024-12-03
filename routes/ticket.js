@@ -43,8 +43,8 @@ router.post('/', authenticateToken, (req, res) => {
         }
 
         const query = `
-            INSERT INTO ticket (travel_record_id, place, ticket_date, created_at)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO ticket (travel_record_id, place, ticket_date)
+            VALUES (?, ?, ?)
         `;
 
         const values = [travel_id, place, ticket_date, new Date()];
@@ -69,7 +69,7 @@ router.get('/:ticket_id', authenticateToken, (req, res) => {
     const ticket_id = req.params.ticket_id;
 
     const query = `
-        SELECT ticket_id, travel_record_id, place, ticket_date, created_at
+        SELECT ticket_id, travel_record_id, place, ticket_date
         FROM ticket
         WHERE ticket_id = ?
     `;
