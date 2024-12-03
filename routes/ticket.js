@@ -41,9 +41,10 @@ router.post('/', authenticateToken, (req, res) => {
                 message: "유효하지 않은 여행 ID입니다."
             });
         }
+
         const pieceQuery = `
             INSERT INTO piece (travel_id, category, description)
-            VALUES (?, 'ticket', ?, ?)
+            VALUES (?, 'ticket', ?)
         `;
         const pieceValues = [travel_id, `${place} 티켓`, new Date()];
         con.query(pieceQuery, pieceValues, (err, result) => {
@@ -53,8 +54,10 @@ router.post('/', authenticateToken, (req, res) => {
                     message: "티켓 조각 생성 중 오류가 발생했습니다."
                 });
             }
-            const travel_record_id = result.insertId;
 
+            const travel_record_id = result.insertId;  // piece 테이블에서 생성된 travel_record_id
+
+            // ticket 테이블에 티켓 추가
             const ticketQuery = `
                 INSERT INTO ticket (travel_record_id, place, ticket_date)
                 VALUES (?, ?, ?)
