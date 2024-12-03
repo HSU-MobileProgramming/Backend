@@ -11,7 +11,7 @@ let con = db.init();
 db.connect(con);
 
 // 비밀번호 해시 함수
-function hashPassword(password) {
+function hashPassword(password) { 
     return crypto.createHash('sha256').update(password).digest('hex');
 }
 
@@ -76,7 +76,7 @@ router.post('/login', (req, res) => {
         const token = jwt.sign(
             { userId: user.user_id, email: user.email }, 
             SECRET_KEY,
-            { expiresIn: '1h' } // 토큰 유효 시간 1h
+            { expiresIn: '24h' } // 토큰 유효 시간 1h
         );
         res.status(200).json({ message: "로그인 성공!", user: results[0], token: token });
     });
