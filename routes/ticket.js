@@ -83,7 +83,7 @@ router.post('/', authenticateToken, (req, res) => {
 router.get('/:travel_record_id', authenticateToken, (req, res) => {
     const travel_record_id = req.params.travel_record_id;
     const query = `
-        SELECT t.travel_record_id, p.travel_id, t.place, t.ticket_date
+        SELECT t.travel_record_id, p.travel_id, t.place, t.ticket_date, t.city
         FROM ticket t
         JOIN piece p ON t.travel_record_id = p.travel_record_id
         WHERE t.travel_record_id = ?
