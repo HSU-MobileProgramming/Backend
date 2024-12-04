@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 const db = require('../config/mysql.js');
 const authenticateToken = require('../utils/auth.js');
@@ -6,7 +6,7 @@ const authenticateToken = require('../utils/auth.js');
 let con = db.init();
 db.connect(con);
 
-// travel_id 검증 함수
+// 여행 ID 검증 함수
 function validateTravelId(travel_id, callback) {
     const query = 'SELECT COUNT(*) AS count FROM travel WHERE travel_id = ?';
     con.query(query, [travel_id], (err, results) => {
@@ -42,39 +42,54 @@ router.post('/', authenticateToken, (req, res) => {
             });
         }
 
-        const query = `
-            INSERT INTO ticket (travel_record_id, place, ticket_date, created_at)
-            VALUES (?, ?, ?, ?)
+        const pieceQuery = `
+            INSERT INTO piece (travel_id, category, description)
+            VALUES (?, 'ticket', ?)
         `;
-
-        const values = [travel_id, place, ticket_date, new Date()];
-
-        con.query(query, values, (err, result) => {
+        const pieceValues = [travel_id, `${place} 티켓`, new Date()];
+        con.query(pieceQuery, pieceValues, (err, result) => {
             if (err) {
-                console.error("티켓 생성 실패:", err.message);
+                console.error("티켓 조각 생성 실패:", err.message);
                 return res.status(500).json({
-                    message: "티켓 생성 중 오류가 발생했습니다."
+                    message: "티켓 조각 생성 중 오류가 발생했습니다."
                 });
             }
-            res.status(201).json({
-                message: "티켓이 생성되었습니다!",
-                ticket_id: result.insertId
+
+            const travel_record_id = result.insertId;  // piece 테이블에서 생성된 travel_record_id
+
+            // ticket 테이블에 티켓 추가
+            const ticketQuery = `
+                INSERT INTO ticket (travel_record_id, place, ticket_date)
+                VALUES (?, ?, ?)
+            `;
+            const ticketValues = [travel_record_id, place, ticket_date];
+            con.query(ticketQuery, ticketValues, (err, result) => {
+                if (err) {
+                    console.error("티켓 추가 실패:", err.message);
+                    return res.status(500).json({
+                        message: "티켓 추가 중 오류가 발생했습니다."
+                    });
+                }
+                res.status(201).json({
+                    message: "티켓이 추가되었습니다!",
+                    travel_record_id: travel_record_id
+                });
             });
         });
     });
 });
 
 // 티켓 조회 API
-router.get('/:ticket_id', authenticateToken, (req, res) => {
-    const ticket_id = req.params.ticket_id;
-
+router.get('/:travel_record_id', authenticateToken, (req, res) => {
+    const travel_record_id = req.params.travel_record_id;
     const query = `
-        SELECT ticket_id, travel_record_id, place, ticket_date, created_at
-        FROM ticket
-        WHERE ticket_id = ?
+        SELECT t.travel_record_id, p.travel_id, t.place, t.ticket_date
+        FROM ticket t
+        JOIN piece p ON t.travel_record_id = p.travel_record_id
+        WHERE t.travel_record_id = ?
     `;
 
-    con.query(query, [ticket_id], (err, results) => {
+    con.query(query, [travel_record_id], (err, results) => {
         if (err) {
             console.error("티켓 조회 실패:", err.message);
             return res.status(500).json({
@@ -89,5 +104,6 @@ router.get('/:ticket_id', authenticateToken, (req, res) => {
         res.status(200).json(results[0]);
     });
 });
+
 
 module.exports = router;

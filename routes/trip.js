@@ -30,6 +30,43 @@ router.post("/travel_create", authenticateToken, (req, res) => {
     });
 });
 
+// 여행기 수정
+router.put("/travel_update/:travelId", authenticateToken, (req, res) => {
+    const userId = req.user.userId; // 인증된 유저의 ID
+    const travelId = req.params.travelId; // 수정하려는 여행 ID
+    const { title, startDate, endDate, description, cityId, countryId } = req.body; // 수정할 필드들
+
+    // 필수 값 체크
+    if (!title || !startDate || !endDate || !cityId || !countryId) {
+        return res.status(400).json({
+            message: "제목, 시작일, 종료일, 도시 ID, 나라 ID는 필수 항목입니다."
+        });
+    }
+
+    // 여행 기록 수정 쿼리 (제목, 기간, 도시, 나라 수정)
+    const query = `
+        UPDATE travel
+        SET title = ?, start_date = ?, end_date = ?, description = ?, city_id = ?, country_id = ?, updated_at = NOW()
+        WHERE travel_id = ? AND user_id = ?
+    `;
+    con.query(query, [title, startDate, endDate, description, cityId, countryId, travelId, userId], (err, result) => {
+        if (err) {
+            console.error("여행 기록 수정 실패:", err.message);
+            return res.status(500).json({ message: "여행 기록 수정 실패" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "해당 여행 기록을 찾을 수 없습니다." }); // 수정할 여행 기록이 없을 경우
+        }
+
+        res.status(200).json({
+            message: "여행 기록 수정 완료",
+            travelId
+        });
+    });
+});
+
+
 // 여행기 종료
 router.put("/travel/complete/:travelId", authenticateToken, (req, res) => {
     const travelId = req.params.travelId;
