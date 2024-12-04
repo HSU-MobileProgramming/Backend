@@ -21,11 +21,11 @@ function validateTravelId(travel_id, callback) {
 
 // 티켓 생성 API
 router.post('/', authenticateToken, (req, res) => {
-    const { travel_id, place, ticket_date } = req.body;
+    const { travel_id, place, ticket_date, city } = req.body;
 
-    if (!travel_id || !place || !ticket_date) {
+    if (!travel_id || !place || !ticket_date|| !city) {
         return res.status(400).json({
-            message: "여행 ID, 장소, 티켓 날짜는 필수 항목입니다."
+            message: "여행 ID, 장소, 티켓 날짜, 도시는 필수 항목입니다."
         });
     }
 
@@ -59,10 +59,10 @@ router.post('/', authenticateToken, (req, res) => {
 
             // ticket 테이블에 티켓 추가
             const ticketQuery = `
-                INSERT INTO ticket (travel_record_id, place, ticket_date)
-                VALUES (?, ?, ?)
+                INSERT INTO ticket (travel_record_id, place, ticket_date, city)
+                VALUES (?, ?, ?, ?)
             `;
-            const ticketValues = [travel_record_id, place, ticket_date];
+            const ticketValues = [travel_record_id, place, ticket_date, city];
             con.query(ticketQuery, ticketValues, (err, result) => {
                 if (err) {
                     console.error("티켓 추가 실패:", err.message);
