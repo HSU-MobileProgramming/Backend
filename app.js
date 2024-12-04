@@ -15,6 +15,7 @@ const tripRouter = require('./routes/trip.js');
 const ticketRouter = require('./routes/ticket.js');
 const memoRouter = require('./routes/memo.js');
 const photoRouter = require('./routes/photo.js');
+const piecesRouter = require('./routes/pieces.js');
 
 app.use('/user', userRouter);
 app.use('/maps', mapRouter);
@@ -22,6 +23,7 @@ app.use('/trip', tripRouter);
 app.use('/ticket',ticketRouter);
 app.use('/piece/memo', memoRouter);
 app.use('/piece/photo', photoRouter);
+app.use('/pieces', piecesRouter);
 
 const server = http.createServer(app);
 
