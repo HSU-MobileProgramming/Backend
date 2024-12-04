@@ -8,47 +8,16 @@ db.connect(con);
 
 // travel_id 검증 함수
 function validateTravelId(travel_id, callback) {
-  const query = 'SELECT COUNT(*) AS count FROM travel WHERE travel_id = ?';
-  con.query(query, [travel_id], (err, results) => {
-      if (err) {
-          console.error("여행 ID 검증 실패:", err.message);
-          return callback(err, null);
-      }
-      const exists = results[0].count > 0;
-      callback(null, exists);
-  });
+    const query = 'SELECT COUNT(*) AS count FROM travel WHERE travel_id = ?';
+    con.query(query, [travel_id], (err, results) => {
+        if (err) {
+            console.error("여행 ID 검증 실패:", err.message);
+            return callback(err, null);
+        }
+        const exists = results[0].count > 0;
+        callback(null, exists);
+    });
 }
-
-/*
-CREATE TABLE travel (
-    travel_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT,
-    city_id BIGINT,
-    country_id BIGINT,
-    title VARCHAR(255),
-    start_date DATETIME,
-    end_date DATETIME,
-    description TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    travel_open TINYINT(1) DEFAULT 1,
-    is_active TINYINT(1) DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (city_id) REFERENCES city(city_id) ON DELETE SET NULL,
-    FOREIGN KEY (country_id) REFERENCES country(country_id) ON DELETE SET NULL
-);
-
--- 여행 조각 테이블 생성
-CREATE TABLE piece (
-    travel_record_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    travel_id BIGINT,
-    category ENUM('photo', 'text', 'ticket') NOT NULL,
-    description TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (travel_id) REFERENCES travel(travel_id) ON DELETE CASCADE
-);
-*/
 
 // 전체 여행 조각 리스트로 조회 API
 router.get('/:travel_id', authenticateToken, (req, res) => {
