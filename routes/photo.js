@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/mysql.js');
 const authenticateToken = require('../utils/auth.js');
+const uploadImage = require("../utils/s3_util.js"); 
 
 let con = db.init();
 db.connect(con);
@@ -20,12 +21,13 @@ function validateTravelId(travel_id, callback) {
 }
 
 // 사진 조각 생성 API
-router.post('/', authenticateToken, (req, res) => {
-    const { travel_id, url, description } = req.body;
+router.post('/', authenticateToken, uploadImage.single("photo"), (req, res) => {
+    const { travel_id, description } = req.body;
+    const imageUrl = req.file?.location;  // S3에서 업로드된 이미지 URL
 
-    if (!travel_id || !url) {
+    if (!travel_id || !imageUrl) {
         return res.status(400).json({
-            message: "여행 ID와 URL은 필수 항목입니다."
+            message: "여행 ID와 이미지 URL은 필수 항목입니다."
         });
     }
 
@@ -61,7 +63,7 @@ router.post('/', authenticateToken, (req, res) => {
                 INSERT INTO photo (travel_record_id, url)
                 VALUES (?, ?)
             `;
-            const photoValues = [travel_record_id, url];
+            const photoValues = [travel_record_id, imageUrl];  // S3 URL을 photo 테이블에 저장
             con.query(photoQuery, photoValues, (err, result) => {
                 if (err) {
                     console.error("사진 추가 실패:", err.message);
@@ -71,7 +73,8 @@ router.post('/', authenticateToken, (req, res) => {
                 }
                 res.status(201).json({
                     message: "사진이 추가되었습니다!",
-                    travel_record_id: travel_record_id
+                    travel_record_id: travel_record_id,
+                    imageUrl: imageUrl  // 업로드된 이미지 URL 반환
                 });
             });
         });
